@@ -1,9 +1,6 @@
 {
   "eyebrow": "Ayuda",
-  "title": "Privacidad y términos",
   "lead": "Lo esencial en 30 segundos arriba. Después, el texto completo, en español claro.",
-  "docLabel": "Documento",
-  "tabs": { "privacy": "Privacidad", "terms": "Términos de uso" },
   "toc": "En esta página",
   "help": "¿Te quedó alguna duda?",
   "helpLine": "Escribe a <mail></mail>",

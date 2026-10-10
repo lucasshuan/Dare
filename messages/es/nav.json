@@ -34,7 +34,8 @@
     "characters": "Personajes",
     "workshop": "Taller",
     "news": "Novedades",
-    "legal": "Privacidad y términos"
+    "privacy": "Política de privacidad",
+    "terms": "Términos de uso"
   },
   "meta": {
     "rooms": "{n, plural, =0 {ninguna abierta} one {# abierta} other {# abiertas}}",
@@ -54,6 +55,7 @@
     "characters": "personajes biblioteca apodos fotos",
     "workshop": "taller temas preguntas misiones sugerir votar",
     "news": "novedades cambios actualizaciones",
-    "legal": "privacidad terminos legal cookies datos"
+    "privacy": "privacidad politica legal cookies datos",
+    "terms": "terminos uso legal reglas"
   }
 }

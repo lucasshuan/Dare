@@ -1,9 +1,6 @@
 {
   "eyebrow": "Help",
-  "title": "Privacy and terms",
   "lead": "The essentials in 30 seconds at the top. Then the full text, in plain English.",
-  "docLabel": "Document",
-  "tabs": { "privacy": "Privacy", "terms": "Terms of use" },
   "toc": "On this page",
   "help": "Still have questions?",
   "helpLine": "Write to <mail></mail>",

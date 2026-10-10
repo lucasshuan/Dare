@@ -6,6 +6,7 @@ import {
   Activity,
   ChartColumn,
   Clock,
+  FileText,
   GalleryVerticalEnd,
   House,
   LayoutGrid,
@@ -86,7 +87,8 @@ type ItemKey =
   | "characters"
   | "workshop"
   | "news"
-  | "legal";
+  | "privacy"
+  | "terms";
 
 interface Item {
   key: ItemKey;
@@ -149,12 +151,9 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
           : "profile"
       : path === "/"
         ? "home"
-        : path === TERMS
-          ? PRIVACY
-          : // a page under a section marks the section (a character's sheet)
-            ([CHARACTERS, WORKSHOP].find((root) =>
-              path.startsWith(`${root}/`),
-            ) ?? path);
+        : // a page under a section marks the section (a character's sheet)
+          ([CHARACTERS, WORKSHOP].find((root) => path.startsWith(`${root}/`)) ??
+          path);
 
   const groups: { key: GroupKey; items: Item[]; games?: boolean }[] = [
     {
@@ -240,7 +239,8 @@ export function MenuDrawer({ open, onOpenChange, autoFocus }: DeferredProps) {
       key: "help",
       items: [
         { key: "news", href: NEWS, Icon: Megaphone, dot: newsFresh },
-        { key: "legal", href: PRIVACY, Icon: Shield },
+        { key: "privacy", href: PRIVACY, Icon: Shield },
+        { key: "terms", href: TERMS, Icon: FileText },
       ],
     },
   ];

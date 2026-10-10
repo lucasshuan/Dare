@@ -1,6 +1,6 @@
 "use client";
 
-import { Clock, Download, FileText, Lock, Mail, Trash2 } from "lucide-react";
+import { Clock, Download, Mail, Trash2 } from "lucide-react";
 import { m } from "motion/react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Fragment, type ReactNode, useEffect, useState } from "react";
@@ -105,8 +105,8 @@ function rich(text: string): ReactNode[] {
 }
 
 /**
- * /privacy and /terms: the essentials in 30 seconds, then the whole text, in
- * plain words. An index beside it marks the part being read; the rights part
+ * /privacy and /terms, one page each: the essentials in 30 seconds, then the
+ * whole text, in plain words. An index beside it marks the part being read; the rights part
  * downloads the reader's data, opens the account's delete and writes to us.
  */
 export function LegalScreen({ doc }: { doc: Doc }) {
@@ -120,35 +120,8 @@ export function LegalScreen({ doc }: { doc: Doc }) {
     <Screen left={<HubBrand />} right={<HubActions />}>
       <PageHead
         eyebrow={t("eyebrow")}
-        title={t("title")}
+        title={t(`${doc}.title`)}
         lead={t("lead")}
-        actions={
-          <nav
-            aria-label={t("docLabel")}
-            className="inline-flex gap-0.5 rounded-pill bg-sunken p-1"
-          >
-            {(["privacy", "terms"] as const).map((d) => (
-              <Link
-                key={d}
-                href={d === "privacy" ? PRIVACY : TERMS}
-                aria-current={d === doc ? "page" : undefined}
-                className={cn(
-                  "relative inline-flex h-9 items-center gap-[7px] rounded-pill px-3.5 font-semibold text-sm transition-colors",
-                  d === doc
-                    ? "bg-surface text-ink shadow-card"
-                    : "text-ink-muted hover:text-ink",
-                )}
-              >
-                {d === "privacy" ? (
-                  <Lock className="size-4" strokeWidth={2} />
-                ) : (
-                  <FileText className="size-4" strokeWidth={2} />
-                )}
-                {t(`tabs.${d}`)}
-              </Link>
-            ))}
-          </nav>
-        }
       />
       <div className="grid items-start gap-8 lg:grid-cols-[230px_minmax(0,1fr)]">
         <nav
@@ -198,10 +171,7 @@ export function LegalScreen({ doc }: { doc: Doc }) {
           </div>
         </nav>
         <article className="min-w-0 max-w-[760px]">
-          <header className="mb-5 grid gap-2">
-            <h2 className="font-display font-extrabold text-[28px] leading-tight tracking-[-0.02em]">
-              {t(`${doc}.title`)}
-            </h2>
+          <header className="mb-5">
             <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[13px] text-ink-muted">
               <span className="inline-flex items-center gap-1.5">
                 <Clock className="size-4" strokeWidth={1.75} />

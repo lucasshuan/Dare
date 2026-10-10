@@ -34,7 +34,8 @@
     "characters": "Characters",
     "workshop": "Workshop",
     "news": "What's new",
-    "legal": "Privacy and terms"
+    "privacy": "Privacy policy",
+    "terms": "Terms of use"
   },
   "meta": {
     "rooms": "{n, plural, =0 {none open} one {# open} other {# open}}",
@@ -54,6 +55,7 @@
     "characters": "characters library nicknames photos pictures",
     "workshop": "workshop themes questions missions suggest vote",
     "news": "news what's new updates changelog",
-    "legal": "privacy terms legal cookies data"
+    "privacy": "privacy policy legal cookies data",
+    "terms": "terms of use legal rules"
   }
 }
