@@ -28,13 +28,15 @@ export type Track = keyof typeof TRACKS;
 
 /**
  * Song positions (seconds) on the shared timeline. Every file loops over the
- * same 48 bars; what comes before plays once. A take may open with an intro of
- * its own (`intro` seconds at the head of its file, before the shared song's
+ * same 40 bars, bar 8 to bar 48: five 8-bar phrases, so the wrap goes from the
+ * turnaround bar that ends a phrase to the downbeat that starts one, past the
+ * song's own 8-bar intro (bars 0 to 7), which plays once. A take may open
+ * with an intro of its own (`intro` seconds at the head of its file, before the shared song's
  * position 0): it plays when the music starts on that take, as negative
  * positions, and is skipped when another take hands over past it.
  */
-const LOOP_START = 8.1062;
-const LOOP_END = 129.2721;
+const LOOP_START = 20.7277;
+const LOOP_END = 121.6995;
 const LOOP = LOOP_END - LOOP_START;
 
 /** The tape clunk into the booth: the file starts 0.5 s before the clunk. */
@@ -53,8 +55,8 @@ export function musicVolume(settings: Settings): number {
 
 /**
  * The tune's beat, for anything that moves with it: 95.08 BPM, the first beat
- * 0.5333 s into the shared song. The loop starts on a beat and holds 192 of
- * them, so the beat keeps its place across every wrap; the takes' intros keep
+ * 0.5333 s into the shared song (a bar's downbeat). The loop starts on a
+ * downbeat and holds 160 beats, so the beat keeps its place across every wrap; the takes' intros keep
  * the same beat before it.
  */
 export const MUSIC_BEAT = 60 / 95.076;
