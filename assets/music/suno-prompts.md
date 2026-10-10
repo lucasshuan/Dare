@@ -2,8 +2,10 @@
 
 The style prompt and exclude list behind each take in `public/music/`, as
 Suno shows them. Each file was then stretched onto the stage's beat grid
-(95.08 BPM) and cut to the shared loop, after its own intro
-(`src/lib/music.ts`).
+(95.08 BPM) and cut to the shared loop, bars 8 to 48 of the song, after its
+own intro (`src/lib/music.ts`). The last phrase of each loop is nudged by a
+few milliseconds so the beat at the loop's end lands where it does at its
+start.
 
 ## stage-loop.mp3 (stage)
 

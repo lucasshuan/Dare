@@ -12,10 +12,10 @@ describe("loopPosition", () => {
   it("plays the intro once, then wraps inside the loop", () => {
     expect(loopPosition(0)).toBe(0);
     expect(loopPosition(100)).toBe(100);
-    // the loop runs from 8.1062 s to 129.2721 s
-    expect(loopPosition(129.2721)).toBeCloseTo(8.1062);
-    expect(loopPosition(130)).toBeCloseTo(8.1062 + (130 - 129.2721));
-    expect(loopPosition(129.2721 + 121.1659 * 2 + 1)).toBeCloseTo(9.1062);
+    // the loop runs from 20.7277 s (bar 8) to 121.6995 s (bar 48)
+    expect(loopPosition(121.6995)).toBeCloseTo(20.7277);
+    expect(loopPosition(122)).toBeCloseTo(20.7277 + (122 - 121.6995));
+    expect(loopPosition(121.6995 + 100.9718 * 2 + 1)).toBeCloseTo(21.7277);
   });
   it("keeps a take's intro as negative positions", () => {
     expect(loopPosition(-12.5)).toBe(-12.5);
@@ -54,7 +54,8 @@ describe("beatDelay", () => {
       40 + MUSIC_FIRST_BEAT - 2 * phrase,
     );
   });
-  it("keeps 192 beats to the loop, so the beat survives each wrap", () => {
-    expect((129.2721 - 8.1062) / MUSIC_BEAT).toBeCloseTo(192, 1);
+  it("loops from a downbeat over whole 8-bar phrases, so the beat survives each wrap", () => {
+    expect((20.7277 - MUSIC_FIRST_BEAT) / MUSIC_BEAT).toBeCloseTo(32, 1);
+    expect((121.6995 - 20.7277) / MUSIC_BEAT).toBeCloseTo(160, 1);
   });
 });
