@@ -55,7 +55,10 @@ const fonts = (lang: Lang) =>
 export interface OgText {
   lang: Lang;
   tagline: string;
+  /** The game pages' pills. */
   chips: string[];
+  /** The home page's pills: it has no player count, the games differ. */
+  homeChips: string[];
   game: string;
   pitch: string;
   question: string;
@@ -399,7 +402,7 @@ export function HomeArt({ text }: { text: OgText }) {
         >
           {text.tagline}
         </div>
-        <Pills lang={lang} items={text.chips} />
+        <Pills lang={lang} items={text.homeChips} />
       </div>
     </Frame>
   );

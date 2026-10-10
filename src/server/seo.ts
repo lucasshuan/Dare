@@ -98,6 +98,7 @@ export async function ogText(lang: Lang): Promise<OgText> {
     lang,
     tagline: meta("tagline"),
     chips: [meta("chips.free"), meta("chips.players"), meta("chips.browser")],
+    homeChips: [meta("chips.free"), meta("chips.browser")],
     game: home("name"),
     pitch: meta("whoAmI.pitch"),
     question: home("demoQuestion"),
