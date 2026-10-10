@@ -88,3 +88,31 @@ test("reduced motion and failed room links leave the entrance", async ({
   await expect(page.locator("[data-room-entrance]")).toHaveCount(0);
   await expect(page.getByRole("heading").first()).toBeVisible();
 });
+
+test("a direct link waits for its game before painting the backdrop", async ({
+  browser,
+}) => {
+  const host = await newPlayer(browser);
+  await host.goto("/en/new?game=impostor");
+  await host.waitForURL(/\/r\/[A-Z0-9]{5}$/);
+  const code = host.url().split("/").pop() as string;
+
+  const guest = await newPlayer(browser);
+  let releaseRead = () => {};
+  const reading = new Promise<void>((resolve) => {
+    releaseRead = resolve;
+  });
+  await guest.route("**/api/rooms/*", async (route) => {
+    if (route.request().method() === "GET") await reading;
+    await route.continue();
+  });
+  await guest.goto(`/en/r/${code}`);
+  await expect(guest.locator("[data-room-entrance]")).toBeVisible();
+  // the game is not known yet: no game's colours
+  await expect(guest.locator(".lobby-backdrop")).toHaveCount(0);
+  releaseRead();
+  await expect(guest.locator(".lobby-backdrop")).toHaveAttribute(
+    "data-game",
+    "impostor",
+  );
+});

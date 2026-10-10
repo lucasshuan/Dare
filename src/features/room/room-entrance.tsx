@@ -13,7 +13,7 @@ import {
 } from "react";
 import { Loader } from "@/components/ui/loader";
 import { LobbyBackdrop } from "@/features/lobby/lobby-backdrop";
-import { DEFAULT_GAME, type GameKey } from "@/game/games";
+import type { GameKey } from "@/game/games";
 import { usePathname } from "@/i18n/navigation";
 import { ease } from "@/lib/motion";
 
@@ -52,7 +52,7 @@ export function RoomEntranceProvider({ children }: { children: ReactNode }) {
       : backdrop?.path === path
         ? backdrop.game
         : room
-          ? (entrance?.game ?? DEFAULT_GAME)
+          ? (entrance?.game ?? null)
           : null;
 
   useEffect(() => {
