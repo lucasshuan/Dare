@@ -189,7 +189,12 @@ describe("what the view says", () => {
     // a lobby nobody changes for long drops off the list (its pages may have died)
     const t = new Game(2, 1, { seats: 3 });
     expect(t.state.deadline).toBeNull();
-    expect(toPublicRoom(t.state, t.now + 5 * 60_000)?.status).toBe("open");
+    expect(toPublicRoom(t.state, t.now + 2 * 60_000)?.status).toBe("open");
+    expect(toPublicRoom(t.state, t.now + LOBBY_LISTED_MS)).toBeNull();
+    // an open page keeps touching it, so it stays listed
+    t.now += 2 * 60_000;
+    t.do({ type: "SEEN", playerId: "p1" });
+    expect(toPublicRoom(t.state, t.now + 2 * 60_000)?.status).toBe("open");
     expect(toPublicRoom(t.state, t.now + LOBBY_LISTED_MS)).toBeNull();
   });
 

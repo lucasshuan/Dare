@@ -515,6 +515,11 @@ function apply(s: RoomState, e: GameEvent, ctx: Ctx) {
       p.goneAt = null;
       return;
     }
+    case "SEEN": {
+      requireSeated(s, e.playerId);
+      if (s.phase === "closed") fail("wrong_phase");
+      return;
+    }
     case "SWEEP":
       return sweep(s, ctx);
     case "SET_READY": {

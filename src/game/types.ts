@@ -202,10 +202,17 @@ export const CLOCK_CUT_FLOOR_MS = 10_000;
 export const TALK_FLOOR_MS = 20_000;
 /**
  * A lobby has no clock: the match starts when the host starts it. One nobody
- * changed in this long leaves the room list (its pages may have died without
- * saying so).
+ * touched in this long leaves the room list: its pages may have died without
+ * saying so (a killed browser sends no goodbye). Open pages keep a room
+ * touched, see HEARTBEAT_MS.
  */
-export const LOBBY_LISTED_MS = 15 * 60_000;
+export const LOBBY_LISTED_MS = 3 * 60_000;
+/**
+ * An open page asks for its room every poll; when the room has not been
+ * written for this long, that read writes a quiet SEEN, so a room with a page
+ * open is never older than this plus a poll.
+ */
+export const HEARTBEAT_MS = 60_000;
 /**
  * How long a closed page counts as a reload. After that a lobby lets the
  * player go, and a match whose players have all closed their pages ends.
@@ -591,6 +598,8 @@ export type GameEvent =
   | { type: "GONE"; playerId: PlayerId }
   /** The player's page is open again. */
   | { type: "BACK"; playerId: PlayerId }
+  /** Someone has a page open on the room: touches it, so a room nobody left open ages out of the list. */
+  | { type: "SEEN"; playerId: PlayerId }
   /** Settles players whose page has been closed for longer than GONE_GRACE_MS. */
   | { type: "SWEEP" }
   | { type: "SET_READY"; playerId: PlayerId; ready: boolean }

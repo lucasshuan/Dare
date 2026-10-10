@@ -71,6 +71,8 @@ export function useRoom(code: string) {
     },
     refetchInterval: pollMs(connected),
     refetchOnWindowFocus: true,
+    // a hidden tab is still a page open on the room: its polls keep the room listed
+    refetchIntervalInBackground: true,
     retry: (count, error) => !(error instanceof RoomError) && count < 2,
   });
 

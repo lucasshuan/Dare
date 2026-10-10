@@ -453,7 +453,7 @@ function pastMatches(
 }
 
 /** A match nobody has touched for this long is not shown as being played. */
-const PLAYING_FRESH_MS = 20 * 60_000;
+const PLAYING_FRESH_MS = 5 * 60_000;
 const PLAYING_PHASES = new Set([
   "theming",
   "voting",

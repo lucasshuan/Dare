@@ -1,4 +1,4 @@
-import { GameError } from "@/game/types";
+import { GameError, HEARTBEAT_MS } from "@/game/types";
 import { toView } from "@/game/view";
 import { getBackend } from "@/server/backend";
 import { langParam } from "@/server/http";
@@ -48,6 +48,15 @@ export async function GET(
   if (mine.goneAt != null) {
     try {
       room = await dispatch(code, () => ({ type: "BACK", playerId: me.id }));
+    } catch (e) {
+      if (!(e instanceof GameError)) throw e;
+    }
+  } else if (Date.now() - stored.state.updatedAt >= HEARTBEAT_MS) {
+    // A page is open: touch the room, so only a room with no page left ages out of the list.
+    try {
+      room = await dispatch(code, () => ({ type: "SEEN", playerId: me.id }), {
+        quiet: true,
+      });
     } catch (e) {
       if (!(e instanceof GameError)) throw e;
     }
