@@ -22,33 +22,62 @@ const bar = (n: number) => MUSIC_FIRST_BEAT + n * 4 * MUSIC_BEAT;
  * `assets/music/suno-prompts.md`.
  *
  * Song positions are seconds on that timeline. The song's own 8-bar intro
- * (bars 0 to 7) plays once; every take then loops from bar 8 to `end`, the end
- * of its own turnaround: after bar 48 for the takes whose turnaround runs a
- * bar longer, after bar 47 for the rest. A take may open with an intro of its
- * own (`intro` seconds at the head of its file, before the song's position 0):
- * it plays when the music starts on that take, as negative positions, and is
- * skipped when another take hands over past it.
+ * (bars 0 to 7) plays once; a take then loops from `start` (bar 8, or bar 0
+ * for a take that goes back into the intro) to `end`, the end of its own
+ * turnaround: after bar 48 for the takes whose turnaround runs a bar longer,
+ * after bar 47 for the rest. A take may open with an intro of its own (`intro`
+ * seconds at the head of its file, before the song's position 0): it plays
+ * when the music starts on that take, as negative positions, and is skipped
+ * when another take hands over past it.
  */
 const TRACKS = {
   /** The show's lounge vamp: the room, the lobby and every match. */
-  stage: { src: "/music/stage-loop.mp3", intro: 0, end: bar(49) },
+  stage: {
+    src: "/music/stage-loop.mp3",
+    intro: 0,
+    start: bar(8),
+    end: bar(49),
+  },
   /** The same vamp on an old radio in the booth: Build the Team's presenter. Mixed 6 dB under the stage. Its bars start 3 beats into its file. */
-  booth: { src: "/music/booth-loop.mp3", intro: 3 * MUSIC_BEAT, end: bar(48) },
+  booth: {
+    src: "/music/booth-loop.mp3",
+    intro: 3 * MUSIC_BEAT,
+    start: bar(8),
+    end: bar(48),
+  },
   /** The same vamp as hushed spy suspense: Impostor's rooms. As loud as the stage. */
-  impostor: { src: "/music/impostor-loop.mp3", intro: 20.7542, end: bar(49) },
+  impostor: {
+    src: "/music/impostor-loop.mp3",
+    intro: 20.7542,
+    start: bar(0),
+    end: bar(49),
+  },
   /** The same vamp as 1970s game-show bidding: Build the Team's lobby and auction. As loud as the stage. */
-  bidding: { src: "/music/bidding-loop.mp3", intro: 0, end: bar(49) },
+  bidding: {
+    src: "/music/bidding-loop.mp3",
+    intro: 0,
+    start: bar(8),
+    end: bar(49),
+  },
   /** The same vamp as a retro sports groove: Build the Team from the wrap-up to the results. As loud as the stage. */
-  matchday: { src: "/music/matchday-loop.mp3", intro: 9.7972, end: bar(49) },
+  matchday: {
+    src: "/music/matchday-loop.mp3",
+    intro: 9.7972,
+    start: bar(8),
+    end: bar(49),
+  },
   /** The same vamp as a cheeky school bounce, kept for later: nothing plays it yet. As loud as the stage. */
-  recess: { src: "/music/recess-loop.mp3", intro: 1.9381, end: bar(48) },
+  recess: {
+    src: "/music/recess-loop.mp3",
+    intro: 1.9381,
+    start: bar(8),
+    end: bar(48),
+  },
 } as const satisfies Record<
   string,
-  { src: string; intro: number; end: number }
+  { src: string; intro: number; start: number; end: number }
 >;
 export type Track = keyof typeof TRACKS;
-
-const LOOP_START = bar(8);
 
 /** The tape clunk into the booth: the file starts 0.5 s before the clunk. */
 const SWITCH_SFX = "/sounds/tv-switch.mp3";
@@ -83,12 +112,12 @@ export function beatDelay(originMs: number, nowMs: number): number {
 /**
  * Where a timeline position lands in `track` once its loop has wrapped;
  * negative positions are a take's intro. A position past a take's end (a
- * longer take handing over in its last bar) lands that far into bar 8.
+ * longer take handing over in its last bar) lands that far into its loop.
  */
 export function loopPosition(seconds: number, track: Track): number {
-  const { end } = TRACKS[track];
+  const { start, end } = TRACKS[track];
   if (seconds < end) return seconds;
-  return LOOP_START + ((seconds - LOOP_START) % (end - LOOP_START));
+  return start + ((seconds - start) % (end - start));
 }
 
 type Playing = {
@@ -191,7 +220,7 @@ function start(
   fadeIn: number,
 ) {
   const c = context();
-  const { intro, end } = TRACKS[track];
+  const { intro, start, end } = TRACKS[track];
   const gain = c.createGain();
   gain.gain.setValueAtTime(0, at);
   gain.gain.linearRampToValueAtTime(1, at + fadeIn);
@@ -199,7 +228,7 @@ function start(
   const source = c.createBufferSource();
   source.buffer = buffer;
   source.loop = true;
-  source.loopStart = LOOP_START + intro;
+  source.loopStart = start + intro;
   source.loopEnd = end + intro;
   source.connect(gain);
   // deeper into an intro than this take's own goes: it starts from its top

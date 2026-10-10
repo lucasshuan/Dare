@@ -27,6 +27,10 @@ describe("loopPosition", () => {
   it("keeps a take's intro as negative positions", () => {
     expect(loopPosition(-12.5, "impostor")).toBe(-12.5);
   });
+  it("loops the impostor back into the song's intro, to bar 0", () => {
+    expect(loopPosition(bar(49), "impostor")).toBeCloseTo(bar(0));
+    expect(loopPosition(bar(49) + 3, "impostor")).toBeCloseTo(bar(0) + 3);
+  });
 });
 
 describe("musicVolume", () => {
