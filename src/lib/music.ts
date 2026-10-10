@@ -18,7 +18,7 @@ const TRACKS = {
   /** The same vamp as hushed spy suspense: Impostor's rooms. As loud as the stage. */
   impostor: { src: "/music/impostor-loop.mp3", intro: 20.7542 },
   /** The same vamp as 1970s game-show bidding: Build the Team's lobby and auction. As loud as the stage. */
-  bidding: { src: "/music/bidding-loop.mp3", intro: 19.8832 },
+  bidding: { src: "/music/bidding-loop.mp3", intro: 0 },
   /** The same vamp as a retro sports groove: Build the Team from the wrap-up to the results. As loud as the stage. */
   matchday: { src: "/music/matchday-loop.mp3", intro: 9.7972 },
   /** The same vamp as a cheeky school bounce, kept for later: nothing plays it yet. As loud as the stage. */
