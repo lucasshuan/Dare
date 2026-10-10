@@ -13,6 +13,13 @@ export const MUSIC_BEAT = 60 / 95.076;
 export const MUSIC_FIRST_BEAT = 0.5333;
 /** Where bar `n` of the shared song starts (seconds). */
 const bar = (n: number) => MUSIC_FIRST_BEAT + n * 4 * MUSIC_BEAT;
+/**
+ * Where a loop cuts at bar `n`: 90 ms before the grid's downbeat, since the
+ * takes' attacks land up to about 55 ms ahead of it. Cut on the grid, the end
+ * let the next downbeat's cymbal start before the wrap and the start lost the
+ * first downbeat's attack.
+ */
+const cut = (n: number) => bar(n) - 0.09;
 
 /**
  * The background music: one tune in several takes that share a timeline (same
@@ -35,43 +42,43 @@ const TRACKS = {
   stage: {
     src: "/music/stage-loop.mp3",
     intro: 0,
-    start: bar(0),
-    end: bar(49),
+    start: cut(0),
+    end: cut(49),
   },
   /** The same vamp on an old radio in the booth: Build the Team's presenter. Mixed 6 dB under the stage. Its bars start 3 beats into its file. */
   booth: {
     src: "/music/booth-loop.mp3",
     intro: 3 * MUSIC_BEAT,
-    start: bar(8),
-    end: bar(48),
+    start: cut(8),
+    end: cut(48),
   },
   /** The same vamp as hushed spy suspense: Impostor's rooms. As loud as the stage. */
   impostor: {
     src: "/music/impostor-loop.mp3",
     intro: 20.7542,
-    start: bar(0),
-    end: bar(49),
+    start: cut(0),
+    end: cut(49),
   },
   /** The same vamp as 1970s game-show bidding: Build the Team's lobby and auction. As loud as the stage. */
   bidding: {
     src: "/music/bidding-loop.mp3",
     intro: 0,
-    start: bar(0),
-    end: bar(49),
+    start: cut(0),
+    end: cut(49),
   },
   /** The same vamp as a retro sports groove: Build the Team from the wrap-up to the results. As loud as the stage. */
   matchday: {
     src: "/music/matchday-loop.mp3",
     intro: 9.7972,
-    start: bar(8),
-    end: bar(49),
+    start: cut(8),
+    end: cut(49),
   },
   /** The same vamp as a cheeky school bounce, kept for later: nothing plays it yet. As loud as the stage. */
   recess: {
     src: "/music/recess-loop.mp3",
     intro: 1.9381,
-    start: bar(8),
-    end: bar(48),
+    start: cut(8),
+    end: cut(48),
   },
 } as const satisfies Record<
   string,

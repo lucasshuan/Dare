@@ -9,7 +9,8 @@ import {
 import { DEFAULT_SETTINGS, parseSettings } from "./settings";
 
 describe("loopPosition", () => {
-  const bar = (n: number) => MUSIC_FIRST_BEAT + n * 4 * MUSIC_BEAT;
+  // loops cut 90 ms before the downbeat of their bars
+  const bar = (n: number) => MUSIC_FIRST_BEAT + n * 4 * MUSIC_BEAT - 0.09;
   it("plays the intro once, then wraps from the end of the take's turnaround to bar 8", () => {
     expect(loopPosition(0, "stage")).toBe(0);
     expect(loopPosition(100, "stage")).toBe(100);
@@ -68,9 +69,9 @@ describe("beatDelay", () => {
     );
   });
   it("loops from a downbeat over whole bars, so the beat and the bar survive each wrap", () => {
-    const start = MUSIC_FIRST_BEAT + 32 * MUSIC_BEAT;
+    const start = MUSIC_FIRST_BEAT + 32 * MUSIC_BEAT - 0.09;
     // a quarter of a second short of the matchday take's end: still bar 48, 164 beats after bar 8
-    const late = MUSIC_FIRST_BEAT + 196 * MUSIC_BEAT - 0.25;
+    const late = MUSIC_FIRST_BEAT + 196 * MUSIC_BEAT - 0.09 - 0.25;
     expect(loopPosition(late, "matchday")).toBeCloseTo(late);
     expect(loopPosition(late + 0.5, "matchday")).toBeCloseTo(start + 0.25);
     expect((late + 0.25 - start) / MUSIC_BEAT).toBeCloseTo(164, 6);
