@@ -23,7 +23,7 @@ const bar = (n: number) => MUSIC_FIRST_BEAT + n * 4 * MUSIC_BEAT;
  *
  * Song positions are seconds on that timeline. The song's own 8-bar intro
  * (bars 0 to 7) plays once; a take then loops from `start` (bar 8, or bar 0
- * for a take that goes back into the intro) to `end`, the end of its own
+ * for a take whose turnaround leads back into the intro) to `end`, the end of its own
  * turnaround: after bar 48 for the takes whose turnaround runs a bar longer,
  * after bar 47 for the rest. A take may open with an intro of its own (`intro`
  * seconds at the head of its file, before the song's position 0): it plays
@@ -56,7 +56,7 @@ const TRACKS = {
   bidding: {
     src: "/music/bidding-loop.mp3",
     intro: 0,
-    start: bar(8),
+    start: bar(0),
     end: bar(49),
   },
   /** The same vamp as a retro sports groove: Build the Team from the wrap-up to the results. As loud as the stage. */
