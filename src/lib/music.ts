@@ -93,7 +93,8 @@ type Playing = {
 
 let ctx: AudioContext | null = null;
 let master: GainNode | null = null;
-/** The muffle: a low-pass and a dip, as if the music played in the next room. */
+/** The muffle: a high-pass and a low-pass and a dip, as if the music played in the next room. */
+let muffleLow: BiquadFilterNode | null = null;
 let muffleFilter: BiquadFilterNode | null = null;
 let muffleGain: GainNode | null = null;
 let muffled = false;
@@ -106,12 +107,19 @@ function context() {
   ctx = new AudioContext();
   master = ctx.createGain();
   master.gain.value = musicVolume(getSettings());
+  muffleLow = ctx.createBiquadFilter();
+  muffleLow.type = "highpass";
+  muffleLow.Q.value = 0.5;
   muffleFilter = ctx.createBiquadFilter();
   muffleFilter.type = "lowpass";
   muffleFilter.Q.value = 0.5;
   muffleGain = ctx.createGain();
   setMuffle(true);
-  master.connect(muffleFilter).connect(muffleGain).connect(ctx.destination);
+  master
+    .connect(muffleLow)
+    .connect(muffleFilter)
+    .connect(muffleGain)
+    .connect(ctx.destination);
   // the browser keeps audio off until the first touch: wake it then
   const wake = () => {
     if (ctx?.state !== "running") ctx?.resume().catch(() => {});
@@ -298,16 +306,25 @@ async function apply() {
   publishPulse();
 }
 
-/** In the lobby the music plays through the wall: 450 Hz low-pass, 3 dB down (about 3 LU under the open room). */
-const MUFFLE_HZ = 450;
+/**
+ * Outside the lobby the music plays at 0.75, 25% under its old level. In the
+ * lobby it plays through the wall: a 160 Hz high-pass and a 350 Hz low-pass,
+ * still at 0.7.
+ */
+const OPEN_GAIN = 0.75;
 const MUFFLE_GAIN = 0.7;
+const MUFFLE_HZ = 350;
+const MUFFLE_LOW_HZ = 160;
 const OPEN_HZ = 20000;
+const OPEN_LOW_HZ = 20;
 
 function setMuffle(now = false) {
-  if (!ctx || !muffleFilter || !muffleGain) return;
+  if (!ctx || !muffleLow || !muffleFilter || !muffleGain) return;
   const hz = muffled ? MUFFLE_HZ : OPEN_HZ;
-  const gain = muffled ? MUFFLE_GAIN : 1;
+  const low = muffled ? MUFFLE_LOW_HZ : OPEN_LOW_HZ;
+  const gain = muffled ? MUFFLE_GAIN : OPEN_GAIN;
   if (now) {
+    muffleLow.frequency.value = low;
     muffleFilter.frequency.value = hz;
     muffleGain.gain.value = gain;
     return;
@@ -315,6 +332,8 @@ function setMuffle(now = false) {
   // opening takes about 1.5 s, like walking into the room; closing about 1 s
   const tau = muffled ? 0.35 : 0.5;
   const t = ctx.currentTime;
+  muffleLow.frequency.cancelScheduledValues(t);
+  muffleLow.frequency.setTargetAtTime(low, t, tau);
   muffleFilter.frequency.cancelScheduledValues(t);
   muffleFilter.frequency.setTargetAtTime(hz, t, tau);
   muffleGain.gain.cancelScheduledValues(t);
