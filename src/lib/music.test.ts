@@ -9,16 +9,23 @@ import {
 import { DEFAULT_SETTINGS, parseSettings } from "./settings";
 
 describe("loopPosition", () => {
-  it("plays the intro once, then wraps inside the loop", () => {
-    expect(loopPosition(0)).toBe(0);
-    expect(loopPosition(100)).toBe(100);
-    // the loop runs from 20.7277 s (bar 8) to 121.6995 s (bar 48)
-    expect(loopPosition(121.6995)).toBeCloseTo(20.7277);
-    expect(loopPosition(122)).toBeCloseTo(20.7277 + (122 - 121.6995));
-    expect(loopPosition(121.6995 + 100.9718 * 2 + 1)).toBeCloseTo(21.7277);
+  const bar = (n: number) => MUSIC_FIRST_BEAT + n * 4 * MUSIC_BEAT;
+  it("plays the intro once, then wraps from the end of the take's turnaround to bar 8", () => {
+    expect(loopPosition(0, "stage")).toBe(0);
+    expect(loopPosition(100, "stage")).toBe(100);
+    // the stage's turnaround runs through bar 48, the booth's ends with bar 47
+    expect(loopPosition(bar(48) + 1, "stage")).toBeCloseTo(bar(48) + 1);
+    expect(loopPosition(bar(49), "stage")).toBeCloseTo(bar(8));
+    expect(loopPosition(bar(48), "booth")).toBeCloseTo(bar(8));
+    expect(
+      loopPosition(bar(49) + 2 * (bar(49) - bar(8)) + 1, "stage"),
+    ).toBeCloseTo(bar(8) + 1);
+  });
+  it("hands a longer take's last bar to a shorter one as bar 8", () => {
+    expect(loopPosition(bar(48) + 1.5, "booth")).toBeCloseTo(bar(8) + 1.5);
   });
   it("keeps a take's intro as negative positions", () => {
-    expect(loopPosition(-12.5)).toBe(-12.5);
+    expect(loopPosition(-12.5, "impostor")).toBe(-12.5);
   });
 });
 
@@ -54,8 +61,12 @@ describe("beatDelay", () => {
       40 + MUSIC_FIRST_BEAT - 2 * phrase,
     );
   });
-  it("loops from a downbeat over whole 8-bar phrases, so the beat survives each wrap", () => {
-    expect((20.7277 - MUSIC_FIRST_BEAT) / MUSIC_BEAT).toBeCloseTo(32, 1);
-    expect((121.6995 - 20.7277) / MUSIC_BEAT).toBeCloseTo(160, 1);
+  it("loops from a downbeat over whole bars, so the beat and the bar survive each wrap", () => {
+    const start = MUSIC_FIRST_BEAT + 32 * MUSIC_BEAT;
+    // a quarter of a second short of the stage's end: still bar 48, 164 beats after bar 8
+    const late = MUSIC_FIRST_BEAT + 196 * MUSIC_BEAT - 0.25;
+    expect(loopPosition(late, "stage")).toBeCloseTo(late);
+    expect(loopPosition(late + 0.5, "stage")).toBeCloseTo(start + 0.25);
+    expect((late + 0.25 - start) / MUSIC_BEAT).toBeCloseTo(164, 6);
   });
 });

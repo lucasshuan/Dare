@@ -4,40 +4,51 @@ import { useEffect, useId, useSyncExternalStore } from "react";
 import { getSettings, type Settings, subscribeSettings } from "./settings";
 
 /**
+ * The tune's beat, for anything that moves with it: 95.08 BPM, the first beat
+ * 0.5333 s into the shared song (a bar's downbeat). Every take's loop starts
+ * on a downbeat and holds whole bars, so the beat and the bar keep their
+ * place across every wrap; the takes' intros keep the same beat before it.
+ */
+export const MUSIC_BEAT = 60 / 95.076;
+export const MUSIC_FIRST_BEAT = 0.5333;
+/** Where bar `n` of the shared song starts (seconds). */
+const bar = (n: number) => MUSIC_FIRST_BEAT + n * 4 * MUSIC_BEAT;
+
+/**
  * The background music: one tune in several takes that share a timeline (same
- * tempo, same bars, same loop), so one can take over from another at the
- * same point in the song. Played through WebAudio, so the loop has no gap and
- * every take starts sample-exact. The Suno prompts behind each take are in
+ * tempo, same bars), so one can take over from another at the same point in
+ * the song. Played through WebAudio, so the loop has no gap and every take
+ * starts sample-exact. The Suno prompts behind each take are in
  * `assets/music/suno-prompts.md`.
+ *
+ * Song positions are seconds on that timeline. The song's own 8-bar intro
+ * (bars 0 to 7) plays once; every take then loops from bar 8 to `end`, the end
+ * of its own turnaround: after bar 48 for the takes whose turnaround runs a
+ * bar longer, after bar 47 for the rest. A take may open with an intro of its
+ * own (`intro` seconds at the head of its file, before the song's position 0):
+ * it plays when the music starts on that take, as negative positions, and is
+ * skipped when another take hands over past it.
  */
 const TRACKS = {
   /** The show's lounge vamp: the room, the lobby and every match. */
-  stage: { src: "/music/stage-loop.mp3", intro: 0 },
-  /** The same vamp on an old radio in the booth: Build the Team's presenter. Mixed 6 dB under the stage. */
-  booth: { src: "/music/booth-loop.mp3", intro: 0 },
+  stage: { src: "/music/stage-loop.mp3", intro: 0, end: bar(49) },
+  /** The same vamp on an old radio in the booth: Build the Team's presenter. Mixed 6 dB under the stage. Its bars start 3 beats into its file. */
+  booth: { src: "/music/booth-loop.mp3", intro: 3 * MUSIC_BEAT, end: bar(48) },
   /** The same vamp as hushed spy suspense: Impostor's rooms. As loud as the stage. */
-  impostor: { src: "/music/impostor-loop.mp3", intro: 20.7542 },
+  impostor: { src: "/music/impostor-loop.mp3", intro: 20.7542, end: bar(49) },
   /** The same vamp as 1970s game-show bidding: Build the Team's lobby and auction. As loud as the stage. */
-  bidding: { src: "/music/bidding-loop.mp3", intro: 0 },
+  bidding: { src: "/music/bidding-loop.mp3", intro: 0, end: bar(49) },
   /** The same vamp as a retro sports groove: Build the Team from the wrap-up to the results. As loud as the stage. */
-  matchday: { src: "/music/matchday-loop.mp3", intro: 9.7972 },
+  matchday: { src: "/music/matchday-loop.mp3", intro: 9.7972, end: bar(49) },
   /** The same vamp as a cheeky school bounce, kept for later: nothing plays it yet. As loud as the stage. */
-  recess: { src: "/music/recess-loop.mp3", intro: 1.9381 },
-} as const satisfies Record<string, { src: string; intro: number }>;
+  recess: { src: "/music/recess-loop.mp3", intro: 1.9381, end: bar(48) },
+} as const satisfies Record<
+  string,
+  { src: string; intro: number; end: number }
+>;
 export type Track = keyof typeof TRACKS;
 
-/**
- * Song positions (seconds) on the shared timeline. Every file loops over the
- * same 40 bars, bar 8 to bar 48: five 8-bar phrases, so the wrap goes from the
- * turnaround bar that ends a phrase to the downbeat that starts one, past the
- * song's own 8-bar intro (bars 0 to 7), which plays once. A take may open
- * with an intro of its own (`intro` seconds at the head of its file, before the shared song's
- * position 0): it plays when the music starts on that take, as negative
- * positions, and is skipped when another take hands over past it.
- */
-const LOOP_START = 20.7277;
-const LOOP_END = 121.6995;
-const LOOP = LOOP_END - LOOP_START;
+const LOOP_START = bar(8);
 
 /** The tape clunk into the booth: the file starts 0.5 s before the clunk. */
 const SWITCH_SFX = "/sounds/tv-switch.mp3";
@@ -53,14 +64,6 @@ export function musicVolume(settings: Settings): number {
   return g.volume * settings.volume;
 }
 
-/**
- * The tune's beat, for anything that moves with it: 95.08 BPM, the first beat
- * 0.5333 s into the shared song (a bar's downbeat). The loop starts on a
- * downbeat and holds 160 beats, so the beat keeps its place across every wrap; the takes' intros keep
- * the same beat before it.
- */
-export const MUSIC_BEAT = 60 / 95.076;
-export const MUSIC_FIRST_BEAT = 0.5333;
 /** 32 beats: every beat-synced animation repeats within this (beat, bar, the marks' cycle). */
 const PHRASE = 32 * MUSIC_BEAT;
 
@@ -77,10 +80,15 @@ export function beatDelay(originMs: number, nowMs: number): number {
   return delay - Math.ceil((delay - MUSIC_FIRST_BEAT) / PHRASE) * PHRASE;
 }
 
-/** Where a timeline position lands once the loop has wrapped; negative positions are a take's intro. */
-export function loopPosition(seconds: number): number {
-  if (seconds < LOOP_END) return seconds;
-  return LOOP_START + ((seconds - LOOP_START) % LOOP);
+/**
+ * Where a timeline position lands in `track` once its loop has wrapped;
+ * negative positions are a take's intro. A position past a take's end (a
+ * longer take handing over in its last bar) lands that far into bar 8.
+ */
+export function loopPosition(seconds: number, track: Track): number {
+  const { end } = TRACKS[track];
+  if (seconds < end) return seconds;
+  return LOOP_START + ((seconds - LOOP_START) % (end - LOOP_START));
 }
 
 type Playing = {
@@ -172,7 +180,7 @@ export function preloadMusic(track: Track) {
 
 /** The song position (seconds on the shared timeline) at a context time. */
 function position(at: number) {
-  return playing ? loopPosition(at - playing.origin) : 0;
+  return playing ? loopPosition(at - playing.origin, playing.track) : 0;
 }
 
 function start(
@@ -183,7 +191,7 @@ function start(
   fadeIn: number,
 ) {
   const c = context();
-  const { intro } = TRACKS[track];
+  const { intro, end } = TRACKS[track];
   const gain = c.createGain();
   gain.gain.setValueAtTime(0, at);
   gain.gain.linearRampToValueAtTime(1, at + fadeIn);
@@ -192,29 +200,35 @@ function start(
   source.buffer = buffer;
   source.loop = true;
   source.loopStart = LOOP_START + intro;
-  source.loopEnd = LOOP_END + intro;
+  source.loopEnd = end + intro;
   source.connect(gain);
   // deeper into an intro than this take's own goes: it starts from its top
-  const pos = Math.max(-intro, loopPosition(from));
+  const pos = Math.max(-intro, loopPosition(from, track));
   source.start(at, pos + intro);
   return { track, source, gain, origin: at - pos } satisfies Playing;
 }
 
 /**
- * The performance.now() moment the playing song's position 0 played at, while
- * the music is audible; null when it is silent, stopped or not started yet.
+ * The performance.now() moment the playing song's position 0 played at, on
+ * this pass of the loop, while the music is audible; null when it is silent,
+ * stopped or not started yet. It moves on at each wrap: a loop of 41 bars is
+ * not a whole number of 32-beat phrases.
  */
 let pulse: number | null = null;
 const pulseListeners = new Set<() => void>();
+let wrapTimer: ReturnType<typeof setTimeout> | undefined;
 
 function publishPulse() {
+  clearTimeout(wrapTimer);
   let next: number | null = null;
   if (ctx?.state === "running" && playing && musicVolume(getSettings()) > 0) {
     // what is scheduled now comes out of the speakers this much later
     const latency = (ctx.outputLatency || ctx.baseLatency || 0) * 1000;
-    next = Math.round(
-      performance.now() + (playing.origin - ctx.currentTime) * 1000 + latency,
-    );
+    const pos = position(ctx.currentTime);
+    next = Math.round(performance.now() - pos * 1000 + latency);
+    // the next wrap starts a new pass
+    const left = TRACKS[playing.track].end - pos;
+    wrapTimer = setTimeout(publishPulse, left * 1000 + 50);
   }
   // a few ms of re-measuring is not a new beat
   if (
