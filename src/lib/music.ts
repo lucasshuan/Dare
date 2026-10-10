@@ -35,7 +35,7 @@ const TRACKS = {
   stage: {
     src: "/music/stage-loop.mp3",
     intro: 0,
-    start: bar(8),
+    start: bar(0),
     end: bar(49),
   },
   /** The same vamp on an old radio in the booth: Build the Team's presenter. Mixed 6 dB under the stage. Its bars start 3 beats into its file. */

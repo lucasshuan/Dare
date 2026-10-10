@@ -14,11 +14,11 @@ describe("loopPosition", () => {
     expect(loopPosition(0, "stage")).toBe(0);
     expect(loopPosition(100, "stage")).toBe(100);
     // the stage's turnaround runs through bar 48, the booth's ends with bar 47
-    expect(loopPosition(bar(48) + 1, "stage")).toBeCloseTo(bar(48) + 1);
-    expect(loopPosition(bar(49), "stage")).toBeCloseTo(bar(8));
+    expect(loopPosition(bar(48) + 1, "matchday")).toBeCloseTo(bar(48) + 1);
+    expect(loopPosition(bar(49), "matchday")).toBeCloseTo(bar(8));
     expect(loopPosition(bar(48), "booth")).toBeCloseTo(bar(8));
     expect(
-      loopPosition(bar(49) + 2 * (bar(49) - bar(8)) + 1, "stage"),
+      loopPosition(bar(49) + 2 * (bar(49) - bar(8)) + 1, "matchday"),
     ).toBeCloseTo(bar(8) + 1);
   });
   it("hands a longer take's last bar to a shorter one as bar 8", () => {
@@ -27,10 +27,11 @@ describe("loopPosition", () => {
   it("keeps a take's intro as negative positions", () => {
     expect(loopPosition(-12.5, "impostor")).toBe(-12.5);
   });
-  it("loops the impostor and bidding takes back into the song's intro, to bar 0", () => {
+  it("loops the lobby takes (stage, impostor, bidding) back into the song's intro, to bar 0", () => {
     expect(loopPosition(bar(49), "impostor")).toBeCloseTo(bar(0));
     expect(loopPosition(bar(49) + 3, "impostor")).toBeCloseTo(bar(0) + 3);
     expect(loopPosition(bar(49), "bidding")).toBeCloseTo(bar(0));
+    expect(loopPosition(bar(49), "stage")).toBeCloseTo(bar(0));
   });
 });
 
@@ -68,10 +69,10 @@ describe("beatDelay", () => {
   });
   it("loops from a downbeat over whole bars, so the beat and the bar survive each wrap", () => {
     const start = MUSIC_FIRST_BEAT + 32 * MUSIC_BEAT;
-    // a quarter of a second short of the stage's end: still bar 48, 164 beats after bar 8
+    // a quarter of a second short of the matchday take's end: still bar 48, 164 beats after bar 8
     const late = MUSIC_FIRST_BEAT + 196 * MUSIC_BEAT - 0.25;
-    expect(loopPosition(late, "stage")).toBeCloseTo(late);
-    expect(loopPosition(late + 0.5, "stage")).toBeCloseTo(start + 0.25);
+    expect(loopPosition(late, "matchday")).toBeCloseTo(late);
+    expect(loopPosition(late + 0.5, "matchday")).toBeCloseTo(start + 0.25);
     expect((late + 0.25 - start) / MUSIC_BEAT).toBeCloseTo(164, 6);
   });
 });

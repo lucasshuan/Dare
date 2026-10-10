@@ -3,7 +3,7 @@
 The style prompt and exclude list behind each take in `public/music/`, as
 Suno shows them. Each file was then stretched onto the stage's beat grid
 (95.08 BPM), after its own intro, and cut to loop from bar 8 of the song
-(bar 0 for impostor and bidding) to the end of its turnaround: after bar 48 for stage,
+(bar 0 for the lobby takes: stage, impostor and bidding) to the end of its turnaround: after bar 48 for stage,
 impostor, bidding and matchday, after bar 47 for booth and recess
 (`src/lib/music.ts`). The last
 phrase of each loop is nudged by a few milliseconds so the beat at the loop's
