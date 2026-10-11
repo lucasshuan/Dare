@@ -359,10 +359,10 @@ async function apply() {
 /**
  * Outside the lobby the music plays at 0.75, 25% under its old level. In the
  * lobby it plays through the wall: a 160 Hz high-pass and a 350 Hz low-pass,
- * still at 0.7.
+ * at 0.84, 20% louder than before.
  */
 const OPEN_GAIN = 0.75;
-const MUFFLE_GAIN = 0.7;
+const MUFFLE_GAIN = 0.84;
 const MUFFLE_HZ = 350;
 const MUFFLE_LOW_HZ = 160;
 const OPEN_HZ = 20000;
